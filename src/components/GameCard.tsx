@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { getUniquePlatformGroups } from '@/lib/platformIcons';
+import { AGE_RATING_DESCRIPTIONS } from '@/lib/ratings';
 
 export interface Game {
     id: number;
@@ -17,6 +18,8 @@ export interface Game {
     developer_id?: number;
     release_date: string;
     freetogame_profile_url: string;
+    rating?: number | null;
+    age_rating?: string | null;
 }
 
 interface GameCardProps {
@@ -50,7 +53,7 @@ export default function GameCard({ game, index }: GameCardProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/10 to-transparent opacity-90" />
 
-                <div className="absolute top-3 right-3 flex gap-2 max-w-[70%]">
+                <div className="absolute top-3 right-3 flex gap-1.5 max-w-[70%] justify-end flex-wrap-reverse">
                     <span className="px-2 py-1 text-[10px] sm:text-xs font-semibold bg-primary text-white rounded-md shadow-sm truncate">
                         {game.genre}
                     </span>
@@ -76,6 +79,24 @@ export default function GameCard({ game, index }: GameCardProps) {
                 <p className="text-foreground/70 text-xs mb-3 line-clamp-2 flex-grow">
                     {game.short_description}
                 </p>
+
+                {(game.rating || game.age_rating) && (
+                    <div className="flex items-center justify-between mb-3 w-full">
+                        {game.rating ? (
+                            <span className="text-[11px] font-bold text-yellow-500/90 flex items-center gap-0.5 drop-shadow-sm">
+                                ⭐ {game.rating.toFixed(1)}
+                            </span>
+                        ) : <div />}
+                        {game.age_rating && (
+                            <span
+                                title={AGE_RATING_DESCRIPTIONS[game.age_rating] || game.age_rating}
+                                className="px-1.5 py-0.5 text-[9px] font-bold border border-foreground/20 rounded text-foreground/60 tracking-wider bg-surface-hover cursor-help"
+                            >
+                                {game.age_rating}
+                            </span>
+                        )}
+                    </div>
+                )}
 
                 <div className="flex items-center justify-between text-[10px] text-foreground/50 border-t border-border pt-2.5 mt-auto uppercase tracking-wider font-semibold">
                     <span className="truncate max-w-[100px]">{game.developer}</span>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { getAgeRatingString } from '@/lib/ratings';
 
 export async function GET(
   request: Request,
@@ -50,7 +51,7 @@ export async function GET(
 
     // 2. Fetch Games built by this company
     const gamesQuery = `
-      fields name,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date; 
+      fields name,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
       where involved_companies.company = ${companyId};
       sort total_rating_count desc;
       limit 48;
@@ -92,6 +93,8 @@ export async function GET(
           developer: developerName,
           release_date: g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().split('T')[0] : 'TBD',
           freetogame_profile_url: g.url || '', 
+          rating: g.total_rating ? parseFloat((g.total_rating / 10).toFixed(1)) : null,
+          age_rating: getAgeRatingString(g.age_ratings),
         };
     });
 

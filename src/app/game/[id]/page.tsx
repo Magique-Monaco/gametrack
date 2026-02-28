@@ -6,6 +6,7 @@ import { Calendar, Building2, Terminal, Globe2 } from 'lucide-react';
 import { getUniquePlatformGroups } from '@/lib/platformIcons';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AGE_RATING_DESCRIPTIONS } from '@/lib/ratings';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,9 +77,16 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
 
                             {/* Title & Rapid Details */}
                             <div className="flex-1 z-10 w-full mb-4">
-                                <span className="px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-full text-sm font-semibold mb-4 inline-block drop-shadow-md">
-                                    {game.genre}
-                                </span>
+                                <div className="flex flex-wrap items-center gap-2 mb-4 lg:mb-6">
+                                    {game.rating && (
+                                        <span className="px-3 py-1 text-sm font-bold bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full shadow-sm flex items-center gap-1.5">
+                                            ⭐ {game.rating.toFixed(1)} / 10
+                                        </span>
+                                    )}
+                                    <span className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary border border-primary/20 rounded-full">
+                                        {game.genre}
+                                    </span>
+                                </div>
                                 <h1 className="text-4xl md:text-6xl font-bold font-sans tracking-tight mb-4 drop-shadow-xl">{game.title}</h1>
 
                                 <div className="flex flex-wrap items-center gap-6 text-foreground/80 font-mono text-sm max-w-2xl bg-surface/50 p-4 rounded-xl border border-border backdrop-blur-md">
@@ -86,6 +94,16 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
                                         <Calendar className="w-4 h-4 text-primary" />
                                         <span>{game.release_date !== 'TBD' ? new Date(game.release_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'TBD'}</span>
                                     </div>
+                                    {game.age_rating && (
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                title={AGE_RATING_DESCRIPTIONS[game.age_rating] || game.age_rating}
+                                                className="px-1.5 py-0.5 text-[10px] font-bold border border-foreground/30 rounded text-foreground/70 tracking-wider cursor-help"
+                                            >
+                                                {game.age_rating}
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className="flex items-center gap-2 max-w-[200px]">
                                         <Building2 className="w-4 h-4 text-primary shrink-0" />
                                         {game.developer_id ? (

@@ -14,10 +14,10 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   title: "GameTrack | Discover Amazing Games",
-  description: "Your premium source for finding and tracking the best free-to-play games.",
+  description: "Your premium source for finding and tracking the best video games.",
   openGraph: {
     title: "GameTrack",
-    description: "Discover Amazing Free-to-Play Games",
+    description: "Discover and track amazing video games from all platforms.",
     type: "website",
   }
 };

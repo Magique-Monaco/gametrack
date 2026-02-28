@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import GameCard from "@/components/GameCard";
+import GameCarousel from "@/components/GameCarousel";
 import LoadingGrid from "@/components/LoadingGrid";
 import { Game } from "@/components/GameCard";
 
@@ -38,13 +39,7 @@ async function GameSection({ title, category, limit = 20, viewAllLink }: { title
         )}
       </div>
 
-      <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-6 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {games.map((game, index) => (
-          <div key={game.id} className="snap-start shrink-0 w-[160px] sm:w-[180px] md:w-[200px] xl:w-[220px]">
-            <GameCard game={game} index={index} />
-          </div>
-        ))}
-      </div>
+      <GameCarousel games={games} />
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getIgdbToken } from '@/lib/igdbAuth';
+import { getAgeRatingString } from '@/lib/ratings';
 
 export async function GET(
   request: Request,
@@ -23,7 +24,8 @@ export async function GET(
     const query = `
       fields name,cover.image_id,summary,storyline,url,genres.name,platforms.name,platforms.abbreviation,
       involved_companies.company.name,involved_companies.developer,involved_companies.publisher,
-      first_release_date,screenshots.image_id,similar_games.name,similar_games.cover.image_id,websites.category,websites.url; 
+      first_release_date,screenshots.image_id,similar_games.name,similar_games.cover.image_id,websites.category,websites.url,
+      total_rating,age_ratings.rating_category; 
       where id = ${gameId};
     `;
 
@@ -91,6 +93,8 @@ export async function GET(
       release_date: g.first_release_date ? new Date(g.first_release_date * 1000).toISOString().split('T')[0] : 'TBD',
       screenshots: screenshotUrls,
       websites: g.websites || [],
+      rating: g.total_rating ? parseFloat((g.total_rating / 10).toFixed(1)) : null,
+      age_rating: getAgeRatingString(g.age_ratings),
     };
 
     return NextResponse.json(formattedGame);
