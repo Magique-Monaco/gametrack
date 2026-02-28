@@ -38,7 +38,7 @@ export default function GameCarousel({ games }: { games: Game[] }) {
     };
 
     return (
-        <div className="relative group">
+        <div className="relative group/carousel">
             {/* Left Gradient Overlay & Button */}
             <div
                 className={`absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-background to-transparent z-20 transition-opacity duration-300 pointer-events-none flex items-center justify-start ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`}
@@ -46,7 +46,7 @@ export default function GameCarousel({ games }: { games: Game[] }) {
                 <button
                     onClick={() => scroll('left')}
                     disabled={!canScrollLeft}
-                    className="pointer-events-auto ml-2 md:-ml-4 p-2 md:p-3 rounded-full bg-surface border border-border/50 text-foreground/80 hover:text-primary hover:border-primary/50 shadow-xl backdrop-blur transform -translate-x-4 md:-translate-x-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="pointer-events-auto ml-2 md:-ml-4 p-2 md:p-3 rounded-full bg-surface border border-border/50 text-foreground/80 hover:text-primary hover:border-primary/50 shadow-xl backdrop-blur transform -translate-x-4 md:-translate-x-0 opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Scroll left"
                 >
                     <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
@@ -60,7 +60,7 @@ export default function GameCarousel({ games }: { games: Game[] }) {
                 <button
                     onClick={() => scroll('right')}
                     disabled={!canScrollRight}
-                    className="pointer-events-auto mr-2 md:-mr-4 p-2 md:p-3 rounded-full bg-surface border border-border/50 text-foreground/80 hover:text-primary hover:border-primary/50 shadow-xl backdrop-blur transform translate-x-4 md:translate-x-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="pointer-events-auto mr-2 md:-mr-4 p-2 md:p-3 rounded-full bg-surface border border-border/50 text-foreground/80 hover:text-primary hover:border-primary/50 shadow-xl backdrop-blur transform translate-x-4 md:translate-x-0 opacity-0 group-hover/carousel:opacity-100 transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label="Scroll right"
                 >
                     <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
