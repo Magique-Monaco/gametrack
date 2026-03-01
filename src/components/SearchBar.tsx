@@ -6,7 +6,7 @@ import { Search, Loader2, Gamepad2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-interface SearchResult {
+interface GameResult {
     id: number;
     title: string;
     thumbnail: string;
@@ -15,11 +15,22 @@ interface SearchResult {
     rating?: number | null;
 }
 
+interface CompanyResult {
+    id: number;
+    name: string;
+    logoUrl: string | null;
+}
+
+interface SearchSuggestResponse {
+    games: GameResult[];
+    companies: CompanyResult[];
+}
+
 export default function SearchBar() {
     const router = useRouter();
     const [query, setQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
-    const [results, setResults] = useState<SearchResult[]>([]);
+    const [results, setResults] = useState<SearchSuggestResponse>({ games: [], companies: [] });
     const [isLoading, setIsLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const wrapperRef = useRef<HTMLFormElement>(null);
@@ -35,7 +46,7 @@ export default function SearchBar() {
     // Fetch suggestions
     useEffect(() => {
         if (!debouncedQuery.trim()) {
-            setResults([]);
+            setResults({ games: [], companies: [] });
             setShowDropdown(false);
             return;
         }
@@ -44,7 +55,7 @@ export default function SearchBar() {
             setIsLoading(true);
             setShowDropdown(true);
             try {
-                const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}&limit=5`);
+                const res = await fetch(`/api/search-suggest?q=${encodeURIComponent(debouncedQuery)}&gameLimit=3&companyLimit=2`);
                 if (res.ok) {
                     const data = await res.json();
                     setResults(data);
@@ -98,11 +109,11 @@ export default function SearchBar() {
                     }
                 }}
                 onFocus={() => {
-                    if (query.trim() && results.length > 0) {
+                    if (query.trim() && (results.games.length > 0 || results.companies.length > 0)) {
                         setShowDropdown(true);
                     }
                 }}
-                placeholder="Search games..."
+                placeholder="Search for games, developers, and publishers..."
                 autoComplete="off"
                 className="w-full bg-surface-hover border border-border rounded-full py-1.5 pl-10 pr-10 text-sm focus:outline-none focus:border-primary transition-colors text-foreground placeholder:text-foreground/50"
             />
@@ -115,44 +126,92 @@ export default function SearchBar() {
             {/* Dropdown Menu */}
             {showDropdown && (debouncedQuery.trim() !== '') && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col">
-                    {isLoading && results.length === 0 ? (
+                    {isLoading && results.games.length === 0 && results.companies.length === 0 ? (
                         <div className="p-4 flex items-center justify-center text-foreground/50 text-sm gap-2">
                             <Loader2 className="h-4 w-4 animate-spin" /> Searching...
                         </div>
-                    ) : results.length > 0 ? (
-                        <div className="flex flex-col max-h-[400px] overflow-y-auto">
-                            {results.map((game) => (
-                                <Link
-                                    key={game.id}
-                                    href={`/game/${game.id}`}
-                                    onClick={() => setShowDropdown(false)}
-                                    className="flex items-center gap-3 p-3 hover:bg-surface-hover border-b border-border/50 last:border-0 transition-colors group"
-                                >
-                                    <div className="relative w-10 h-14 shrink-0 rounded bg-background overflow-hidden border border-border/50 shadow-sm group-hover:border-primary/50 transition-colors">
-                                        <Image
-                                            src={game.thumbnail}
-                                            alt={game.title}
-                                            fill
-                                            className="object-cover"
-                                            unoptimized={game.thumbnail.includes('nocover')}
-                                        />
+                    ) : results.games.length > 0 || results.companies.length > 0 ? (
+                        <div className="flex flex-col max-h-[450px] overflow-y-auto">
+
+                            {/* Games Section */}
+                            {results.games.length > 0 && (
+                                <div className="flex flex-col">
+                                    <div className="px-3 py-2 text-xs font-bold text-foreground/50 uppercase tracking-wider bg-surface-hover/50">
+                                        Game Titles
                                     </div>
-                                    <div className="flex flex-col flex-1 overflow-hidden">
-                                        <span className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
-                                            {game.title}
-                                        </span>
-                                        <span className="text-xs text-foreground/60 truncate flex items-center gap-1.5 mt-0.5">
-                                            {game.rating && (
-                                                <span className="flex items-center text-yellow-500 font-medium">
-                                                    ⭐ {game.rating.toFixed(1)}
+                                    {results.games.map((game) => (
+                                        <Link
+                                            key={`game-${game.id}`}
+                                            href={`/game/${game.id}`}
+                                            onClick={() => setShowDropdown(false)}
+                                            className="flex items-center gap-3 p-3 hover:bg-surface-hover border-b border-border/50 last:border-0 transition-colors group"
+                                        >
+                                            <div className="relative w-10 h-14 shrink-0 rounded bg-background overflow-hidden border border-border/50 shadow-sm group-hover:border-primary/50 transition-colors">
+                                                <Image
+                                                    src={game.thumbnail}
+                                                    alt={game.title}
+                                                    fill
+                                                    className="object-cover"
+                                                    unoptimized={game.thumbnail.includes('nocover')}
+                                                />
+                                            </div>
+                                            <div className="flex flex-col flex-1 overflow-hidden">
+                                                <span className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                                                    {game.title}
                                                 </span>
-                                            )}
-                                            {game.rating && <span>•</span>}
-                                            {game.release_date !== 'TBD' ? new Date(game.release_date).getFullYear() : 'TBD'} • {game.developer}
-                                        </span>
+                                                <span className="text-xs text-foreground/60 truncate flex items-center gap-1.5 mt-0.5">
+                                                    {game.rating && (
+                                                        <span className="flex items-center text-yellow-500 font-medium">
+                                                            ⭐ {game.rating.toFixed(1)}
+                                                        </span>
+                                                    )}
+                                                    {game.rating && <span>•</span>}
+                                                    {game.release_date !== 'TBD' ? new Date(game.release_date).getFullYear() : 'TBD'} • {game.developer}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Companies Section */}
+                            {results.companies.length > 0 && (
+                                <div className="flex flex-col border-t border-border">
+                                    <div className="px-3 py-2 text-xs font-bold text-foreground/50 uppercase tracking-wider bg-surface-hover/50">
+                                        Developers & Publishers
                                     </div>
-                                </Link>
-                            ))}
+                                    {results.companies.map((company) => (
+                                        <Link
+                                            key={`company-${company.id}`}
+                                            href={`/company/${company.id}`}
+                                            onClick={() => setShowDropdown(false)}
+                                            className="flex items-center gap-3 p-3 hover:bg-surface-hover border-b border-border/50 last:border-0 transition-colors group"
+                                        >
+                                            <div className="w-10 h-10 shrink-0 rounded-full bg-background overflow-hidden border border-border/50 shadow-sm flex items-center justify-center group-hover:border-primary/50 transition-colors relative">
+                                                {company.logoUrl ? (
+                                                    <Image
+                                                        src={company.logoUrl}
+                                                        alt={company.name}
+                                                        fill
+                                                        className="object-contain p-1"
+                                                        unoptimized
+                                                    />
+                                                ) : (
+                                                    <span className="text-sm font-bold opacity-30 group-hover:opacity-60 group-hover:text-primary transition-all">
+                                                        {company.name.charAt(0).toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col overflow-hidden">
+                                                <span className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                                                    {company.name}
+                                                </span>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+
                             <div
                                 onClick={handleSubmit}
                                 className="p-3 text-center text-xs font-semibold text-primary hover:bg-primary/10 cursor-pointer border-t border-border mt-auto transition-colors"
@@ -163,7 +222,7 @@ export default function SearchBar() {
                     ) : (
                         <div className="p-4 flex flex-col items-center justify-center text-foreground/50 text-sm gap-2">
                             <Gamepad2 className="h-6 w-6 opacity-50" />
-                            No games found
+                            No results found
                         </div>
                     )}
                 </div>

@@ -67,11 +67,31 @@ export default function Home() {
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Top Role-Playing Games" category="rpg" limit={20} viewAllLink="/search?category=rpg" />
+          <GameSection title="Action & Adventure" category="action" limit={20} viewAllLink="/search?category=action" />
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>
-          <GameSection title="Top Shooters" category="shooter" limit={20} viewAllLink="/search?category=shooter" />
+          <GameSection title="Role-Playing Games" category="rpg" limit={20} viewAllLink="/search?category=rpg" />
+        </Suspense>
+
+        <Suspense fallback={<LoadingGrid />}>
+          <GameSection title="First-Person & Tactics" category="shooter" limit={20} viewAllLink="/search?category=shooter" />
+        </Suspense>
+
+        <Suspense fallback={<LoadingGrid />}>
+          <GameSection title="Strategy" category="strategy" limit={20} viewAllLink="/search?category=strategy" />
+        </Suspense>
+
+        <Suspense fallback={<LoadingGrid />}>
+          <GameSection title="Sports" category="sports" limit={20} viewAllLink="/search?category=sports" />
+        </Suspense>
+
+        <Suspense fallback={<LoadingGrid />}>
+          <GameSection title="Racing" category="racing" limit={20} viewAllLink="/search?category=racing" />
+        </Suspense>
+
+        <Suspense fallback={<LoadingGrid />}>
+          <GameSection title="Fighting" category="fighting" limit={20} viewAllLink="/search?category=fighting" />
         </Suspense>
 
         <Suspense fallback={<LoadingGrid />}>

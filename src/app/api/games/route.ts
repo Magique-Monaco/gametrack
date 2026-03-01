@@ -47,6 +47,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category') || 'top';
     const limit = searchParams.get('limit') || '20';
+    const offset = searchParams.get('offset') || '0';
 
     let queryConditions = 'sort total_rating_count desc;';
     
@@ -66,6 +67,21 @@ export async function GET(request: Request) {
       case 'indie':
         queryConditions = `where genres = (32); sort total_rating_count desc;`;
         break;
+      case 'action':
+        queryConditions = `where genres = (33); sort total_rating_count desc;`;
+        break;
+      case 'strategy':
+        queryConditions = `where genres = (15); sort total_rating_count desc;`;
+        break;
+      case 'sports':
+        queryConditions = `where genres = (14); sort total_rating_count desc;`;
+        break;
+      case 'racing':
+        queryConditions = `where genres = (10); sort total_rating_count desc;`;
+        break;
+      case 'fighting':
+        queryConditions = `where genres = (4); sort total_rating_count desc;`;
+        break;
       case 'trending':
         queryConditions = `sort popularity desc;`;
         break;
@@ -77,9 +93,10 @@ export async function GET(request: Request) {
 
     // Prepare IGDB query
     const query = `
-      fields name,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
+      fields name,category,game_type,version_parent,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
       ${queryConditions}
       limit ${limit}; 
+      offset ${offset};
     `;
 
     // Fetch from IGDB
@@ -103,9 +120,15 @@ export async function GET(request: Request) {
 
     const rawGames = await res.json();
     
+    // Filter out non-standalone items like bundles, DLCs, and game editions
+    const allowedCategoryTypes = [0, 8, 9];
+    const filteredGames = (rawGames || []).filter((g: any) => 
+      allowedCategoryTypes.includes(g.category ?? g.game_type ?? 0) && !g.version_parent
+    );
+    
     // Map IGDB response to our GameCard format
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedGames = rawGames.map((g: any) => {
+    const formattedGames = filteredGames.map((g: any) => {
       // Find developer (involved_companies have a boolean for developer or publisher, but just grab the first company name for now if available)
       const developerName = g.involved_companies?.[0]?.company?.name || 'Unknown Developer';
       const developerId = g.involved_companies?.[0]?.company?.id || null;

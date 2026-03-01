@@ -40,6 +40,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get('q');
     const limit = searchParams.get('limit') || '48';
+    const offset = searchParams.get('offset') || '0';
 
     if (!searchQuery) {
         return NextResponse.json([]);
@@ -55,8 +56,9 @@ export async function GET(request: Request) {
     // Prepare IGDB query
     const query = `
       search "${searchQuery.replace(/"/g, '')}";
-      fields name,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
+      fields name,category,game_type,version_parent,cover.image_id,summary,url,genres.name,platforms.name,platforms.abbreviation,involved_companies.company.name,first_release_date,total_rating,age_ratings.rating_category; 
       limit ${limit}; 
+      offset ${offset};
     `;
 
     // Fetch from IGDB
@@ -80,9 +82,15 @@ export async function GET(request: Request) {
 
     const rawGames = await res.json();
     
+    // Filter out non-standalone items like bundles, DLCs, and game editions
+    const allowedCategoryTypes = [0, 8, 9];
+    const filteredGames = (rawGames || []).filter((g: any) => 
+      allowedCategoryTypes.includes(g.category ?? g.game_type ?? 0) && !g.version_parent
+    );
+    
     // Map IGDB response to our GameCard format
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const formattedGames = rawGames.map((g: any) => {
+    const formattedGames = filteredGames.map((g: any) => {
       const developerName = g.involved_companies?.[0]?.company?.name || 'Unknown Developer';
       
       const platformsList = g.platforms ? g.platforms.map((p: {name: string, abbreviation?: string}) => p.abbreviation || p.name).join(', ') : 'Unknown';

@@ -37,8 +37,9 @@ export default function GameCard({ game, index }: GameCardProps) {
         <motion.a
             href={`/game/${game.id}`}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05, duration: 0.4 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "50px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             whileHover={{ y: -8, scale: 1.02 }}
             className="group relative flex flex-col bg-surface rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-colors shadow-lg min-w-[160px]"
         >
