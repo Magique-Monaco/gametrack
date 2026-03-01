@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import GameCard, { Game } from '@/components/GameCard';
 import LoadingGrid from '@/components/LoadingGrid';
 import { Building2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,41 @@ async function getCompanyData(id: string): Promise<CompanyData | null> {
         console.error("Error fetching company page data:", error);
         return null;
     }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    const company = await getCompanyData(resolvedParams.id);
+
+    if (!company) {
+        return {
+            title: 'Company Not Found - GameTrack',
+            description: 'This developer or publisher could not be found in our database.',
+        };
+    }
+
+    const cleanDescription = company.description
+        ? company.description.split('\n')[0].substring(0, 160) + (company.description.length > 160 ? '...' : '')
+        : `Check out games developed and published by ${company.name} on GameTrack.`;
+
+    return {
+        title: `${company.name} Games & Details - GameTrack`,
+        description: cleanDescription,
+        openGraph: {
+            title: `${company.name} - GameTrack`,
+            description: cleanDescription,
+            url: `https://gametrack.app/company/${company.id}`,
+            siteName: 'GameTrack',
+            images: company.logoUrl ? [{ url: company.logoUrl, width: 400, height: 400, alt: `${company.name} logo` }] : [],
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary',
+            title: `${company.name} - GameTrack`,
+            description: cleanDescription,
+            images: company.logoUrl ? [company.logoUrl] : [],
+        },
+    };
 }
 
 async function CompanyDetails({ id }: { id: string }) {

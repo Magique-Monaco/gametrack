@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AGE_RATING_DESCRIPTIONS } from '@/lib/ratings';
 
+import { Metadata } from 'next';
+
 export const dynamic = 'force-dynamic';
 
 async function getGameDetails(id: string) {
@@ -30,6 +32,44 @@ async function getGameDetails(id: string) {
     }
 }
 
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const resolvedParams = await params;
+    const game = await getGameDetails(resolvedParams.id);
+
+    if (!game) {
+        return {
+            title: 'Game Not Found - GameTrack',
+            description: 'This game could not be found in our database.',
+        };
+    }
+
+    // Default to the first screenshot if thumbnail is missing
+    const ogImage = !game.thumbnail.includes('nocover') ? game.thumbnail : (game.screenshots?.[0] || '');
+
+    // Strip IGDB's text formatting or extra newlines for a cleaner preview description
+    const cleanDescription = game.description ? game.description.split('\n')[0].substring(0, 160) + (game.description.length > 160 ? '...' : '') : 'A game tracked on GameTrack.';
+
+    return {
+        title: `${game.title} - GameTrack`,
+        description: cleanDescription,
+        openGraph: {
+            title: `${game.title} - GameTrack`,
+            description: cleanDescription,
+            url: `https://gametrack.app/game/${game.id}`,
+            siteName: 'GameTrack',
+            images: ogImage ? [{ url: ogImage, width: 800, height: 600, alt: game.title }] : [],
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${game.title} - GameTrack`,
+            description: cleanDescription,
+            images: ogImage ? [ogImage] : [],
+        },
+    };
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default async function GamePage({ params }: { params: Promise<{ id: string }> }) {
