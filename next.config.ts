@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Required for better-sqlite3 native bindings to work in Next.js Server Components / API Routes
+  serverExternalPackages: ['better-sqlite3'],
   images: {
     remotePatterns: [
       {

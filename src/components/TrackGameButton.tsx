@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLibraryStore, GameStatus } from '@/store/useLibraryStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import { BookmarkPlus, BookmarkCheck, Clock, Trash2 } from 'lucide-react';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
     const [mounted, setMounted] = useState(false);
     const { games, addGame, removeGame, updateStatus, updatePlaytime } = useLibraryStore();
+    const { user } = useAuthStore();
 
     // To avoid hydration mismatch, only render interactive elements after mount
     useEffect(() => {
@@ -28,7 +30,7 @@ export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
     const trackedGame = games.find(g => g.id === gameId);
     const isTracked = !!trackedGame;
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         addGame({
             id: gameId,
             title,
@@ -36,6 +38,72 @@ export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
             status: 'Plan to Play',
             playtime: 0
         });
+
+        // Sync to server if logged in
+        if (user) {
+            try {
+                await fetch(`/api/library/${gameId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        thumbnail,
+                        status: 'Plan to Play',
+                        playtime: 0,
+                        added_at: Date.now(),
+                    }),
+                });
+            } catch {
+                // Silently fail — local state is still updated
+            }
+        }
+    };
+
+    const handleRemove = async () => {
+        removeGame(gameId);
+        if (user) {
+            try {
+                await fetch(`/api/library/${gameId}`, { method: 'DELETE' });
+            } catch { /* silent */ }
+        }
+    };
+
+    const handleStatusChange = async (status: GameStatus) => {
+        updateStatus(gameId, status);
+        if (user && trackedGame) {
+            try {
+                await fetch(`/api/library/${gameId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: trackedGame.title,
+                        thumbnail: trackedGame.thumbnail,
+                        status,
+                        playtime: trackedGame.playtime,
+                        added_at: trackedGame.addedAt,
+                    }),
+                });
+            } catch { /* silent */ }
+        }
+    };
+
+    const handlePlaytimeChange = async (playtime: number) => {
+        updatePlaytime(gameId, playtime);
+        if (user && trackedGame) {
+            try {
+                await fetch(`/api/library/${gameId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: trackedGame.title,
+                        thumbnail: trackedGame.thumbnail,
+                        status: trackedGame.status,
+                        playtime,
+                        added_at: trackedGame.addedAt,
+                    }),
+                });
+            } catch { /* silent */ }
+        }
     };
 
     const STATUS_OPTIONS: GameStatus[] = ['Playing', 'Completed', 'On Hold', 'Dropped', 'Plan to Play'];
@@ -60,7 +128,7 @@ export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
                     <span>In Your Library</span>
                 </div>
                 <button
-                    onClick={() => removeGame(gameId)}
+                    onClick={handleRemove}
                     className="text-foreground/50 hover:text-red-500 transition-colors"
                     title="Remove from library"
                 >
@@ -74,7 +142,7 @@ export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
                     <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider">Status</label>
                     <select
                         value={trackedGame.status}
-                        onChange={(e) => updateStatus(gameId, e.target.value as GameStatus)}
+                        onChange={(e) => handleStatusChange(e.target.value as GameStatus)}
                         className="bg-surface-hover border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary transition-colors appearance-none"
                     >
                         {STATUS_OPTIONS.map(status => (
@@ -92,7 +160,7 @@ export default function TrackGameButton({ gameId, title, thumbnail }: Props) {
                         type="number"
                         min="0"
                         value={trackedGame.playtime || ''}
-                        onChange={(e) => updatePlaytime(gameId, Number(e.target.value))}
+                        onChange={(e) => handlePlaytimeChange(Number(e.target.value))}
                         placeholder="0"
                         className="bg-surface-hover border border-border rounded-lg p-2.5 text-sm focus:outline-none focus:border-primary transition-colors"
                     />
