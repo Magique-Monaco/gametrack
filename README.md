@@ -1,6 +1,6 @@
 # GameTrack
 
-GameTrack is an open-source, modern web application for tracking your video game collection, discovering new titles, and maintaining a personalized library of your gaming journey. Built with a premium glassmorphic UI and powered by the comprehensive IGDB database.
+GameTrack is an open-source, modern web application for tracking your video game collection, discovering new titles, and maintaining a personalized library of your gaming journey. Built with a premium UI and powered by the comprehensive IGDB database.
 
 ## Features
 
@@ -13,7 +13,7 @@ GameTrack is an open-source, modern web application for tracking your video game
 
 ## Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Server Actions, Server Components)
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Server Actions, Server Components)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 
 - **Icons**: Lucide React & React Icons

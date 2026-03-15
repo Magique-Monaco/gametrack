@@ -17,6 +17,7 @@ function checkRateLimit(ip: string): boolean {
   }
 
   if (now - record.timestamp > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.delete(ip);
     rateLimitMap.set(ip, { count: 1, timestamp: now });
     return true;
   }
@@ -46,8 +47,8 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category') || 'top';
-    const limit = searchParams.get('limit') || '20';
-    const offset = searchParams.get('offset') || '0';
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '20', 10) || 20, 1), 50);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10) || 0, 0);
 
     let queryConditions = 'sort total_rating_count desc;';
     

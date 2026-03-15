@@ -16,6 +16,7 @@ function checkRateLimit(ip: string): boolean {
   }
 
   if (now - record.timestamp > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.delete(ip);
     rateLimitMap.set(ip, { count: 1, timestamp: now });
     return true;
   }
@@ -40,8 +41,8 @@ export async function GET(request: Request) {
     const searchQuery = searchParams.get('q');
     
     // We only need a few results for the autocomplete dropdown
-    const gameLimit = searchParams.get('gameLimit') || '3';
-    const companyLimit = searchParams.get('companyLimit') || '2';
+    const gameLimit = Math.min(Math.max(parseInt(searchParams.get('gameLimit') || '3', 10) || 3, 1), 10);
+    const companyLimit = Math.min(Math.max(parseInt(searchParams.get('companyLimit') || '2', 10) || 2, 1), 10);
 
     if (!searchQuery) {
         return NextResponse.json({ games: [], companies: [] });

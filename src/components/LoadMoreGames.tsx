@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import GameCard, { Game } from './GameCard';
 import { Loader2 } from 'lucide-react';
 
@@ -26,7 +26,7 @@ export default function LoadMoreGames({ initialGames, query, category }: LoadMor
         setHasMore(initialGames.length >= 48);
     }, [initialGames, query, category]);
 
-    const loadMore = async () => {
+    const loadMore = useCallback(async () => {
         if (loading || !hasMore) return;
 
         setLoading(true);
@@ -61,7 +61,7 @@ export default function LoadMoreGames({ initialGames, query, category }: LoadMor
         } finally {
             setLoading(false);
         }
-    };
+    }, [loading, hasMore, query, category, offset]);
 
     useEffect(() => {
         // Basic Intersection Observer setup for infinite scrolling
@@ -82,7 +82,7 @@ export default function LoadMoreGames({ initialGames, query, category }: LoadMor
         return () => {
             if (observerRef.current) observerRef.current.disconnect();
         };
-    }, [hasMore, loading, offset]); // Re-bind when state changes to capture correct offset in closure
+    }, [hasMore, loading, loadMore]); // loadMore is now a stable callback reference
 
     return (
         <>

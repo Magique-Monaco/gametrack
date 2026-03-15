@@ -9,8 +9,8 @@ export async function GET(
   const resolvedParams = await params;
   const companyId = resolvedParams.id;
 
-  if (!companyId) {
-    return NextResponse.json({ error: 'Company ID is required' }, { status: 400 });
+  if (!companyId || !/^\d+$/.test(companyId)) {
+    return NextResponse.json({ error: 'A valid numeric Company ID is required' }, { status: 400 });
   }
 
   try {

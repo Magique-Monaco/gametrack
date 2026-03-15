@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { FaPlaystation, FaXbox, FaWindows, FaApple, FaAndroid, FaSteam, FaGamepad } from 'react-icons/fa';
-import { SiNintendoswitch } from 'react-icons/si';
+import { BsNintendoSwitch } from "react-icons/bs";
 
 export interface PlatformGroup {
     id: string;
@@ -29,7 +29,7 @@ export const getUniquePlatformGroups = (platformStrings: string[]): PlatformGrou
         } else if (p.includes('nintendo') || p.includes('switch') || p.includes('wii') || p.includes('nds') || p.includes('3ds')) {
             id = 'nintendo';
             name = 'Nintendo';
-            icon = <SiNintendoswitch className="w-4 h-4" />;
+            icon = <BsNintendoSwitch className="w-4 h-4" />;
         } else if (p.includes('mac') || p.includes('ios') || p.includes('apple')) {
             id = 'apple';
             name = 'Apple';

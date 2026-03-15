@@ -252,7 +252,7 @@ export default async function GamePage({ params }: { params: Promise<{ id: strin
 
                                         {game.game_url && (
                                             <div className="pt-4 border-t border-border mt-4">
-                                                <a href={game.game_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-primary hover:text-primary-hover font-semibold transition-colors">
+                                                <a href={game.game_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:text-primary-hover font-semibold transition-colors">
                                                     <Globe2 className="w-4 h-4" /> Visit Official Page
                                                 </a>
                                             </div>

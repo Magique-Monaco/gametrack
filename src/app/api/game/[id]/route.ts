@@ -9,8 +9,8 @@ export async function GET(
   const resolvedParams = await params;
   const gameId = resolvedParams.id;
 
-  if (!gameId) {
-    return NextResponse.json({ error: 'Game ID is required' }, { status: 400 });
+  if (!gameId || !/^\d+$/.test(gameId)) {
+    return NextResponse.json({ error: 'A valid numeric Game ID is required' }, { status: 400 });
   }
 
   try {

@@ -101,7 +101,7 @@ export default function GameCard({ game, index }: GameCardProps) {
 
                 <div className="flex items-center justify-between text-[10px] text-foreground/50 border-t border-border pt-2.5 mt-auto uppercase tracking-wider font-semibold">
                     <span className="truncate max-w-[100px]">{game.developer}</span>
-                    <span>{new Date(game.release_date).getFullYear() || 'TBD'}</span>
+                    <span>{game.release_date !== 'TBD' ? new Date(game.release_date).getFullYear() : 'TBD'}</span>
                 </div>
             </div>
 

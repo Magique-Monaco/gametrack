@@ -17,6 +17,7 @@ function checkRateLimit(ip: string): boolean {
   }
 
   if (now - record.timestamp > RATE_LIMIT_WINDOW_MS) {
+    rateLimitMap.delete(ip);
     rateLimitMap.set(ip, { count: 1, timestamp: now });
     return true;
   }
@@ -39,8 +40,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get('q');
-    const limit = searchParams.get('limit') || '48';
-    const offset = searchParams.get('offset') || '0';
+    const limit = Math.min(Math.max(parseInt(searchParams.get('limit') || '48', 10) || 48, 1), 50);
+    const offset = Math.max(parseInt(searchParams.get('offset') || '0', 10) || 0, 0);
 
     if (!searchQuery) {
         return NextResponse.json([]);
